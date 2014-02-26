@@ -1,6 +1,8 @@
 # jquery-parallax.js
 
-Simple Parallax heavily costumizable plugin that creates the desired effect by moving the element background-position. By avoiding translated animations, lowers the system requirements to obtain smooth and nice results.
+Simple **heavily costumizable** Parallax plugin that creates the desired effect by animating the element background-position. 
+
+By avoiding translated animations, lowers the system requirements to obtain smooth and nice results.
 
 ## Author
 
