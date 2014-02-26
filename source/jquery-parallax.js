@@ -1,11 +1,11 @@
-/*
+/*!
 Plugin:  jquery-parallax
-Version  1.0
+Version  1.1
 Author:  Víctor 'vxc' Ortega
 URL: 	 http://www.vxc.es/
 GitHub:  https://github.com/vxc-/jquery-parallax
 
-2014 - Licensed under the MIT and GPL licenses.
+2014, Licensed under the MIT and GPL licenses.
 */
 
 if (!jQuery) { throw new Error("jquery-parallax Engine requires jQuery"); }
@@ -19,13 +19,21 @@ if (!jQuery) { throw new Error("jquery-parallax Engine requires jQuery"); }
 	var Parallax = {
 			
 			//Object vars
-			$defaults : {},
+			defaults : {},
 			
 			element : null,
 			
+			bgXunit : 'px',
+			
+			bgXvalue : 0,
+			
+			bgYunit : 'px',
+			
+			bgYvalue : 0,
+			
 			elementTop: 0,
 			
-			$proxyTransition : function(){},
+			proxyTransition : function(){},
 			
 			__init : function( element, options){
 				
@@ -47,18 +55,28 @@ if (!jQuery) { throw new Error("jquery-parallax Engine requires jQuery"); }
 				
 				var $this = this;
 				
-				$this.$defaults = $.extend({}, $.fn.parallax.DEFAULTS, options); 
+				$this.defaults = $.extend({}, $.fn.parallax.DEFAULTS, options); 
 			
 				$this.dispatchTransitionType();
 				
-				//TODO: this.translateBGPosition();
+				$this.parseBGPosition();
+				
+				var transition = $this.defaults.transitionType;
+				
+				//Tuning speed for % positioned images TODO: Rework all this
+				if ( (transition == 'vertical' && $this.bgYunit == '%' ) || (transition == 'horizontal' && $this.bgXunit == '%' ) ) {
+					$this.defaults.speed = $this.defaults.speed / 4;
+				}
+				
+				console.log('Speed after possible tunning: ' + $this.defaults.speed);
+				
 			},
 			
 			dispatchTransitionType : function() {
 				
 				var $this = this;
 				
-				switch ($this.$defaults.transitionType) {
+				switch ($this.defaults.transitionType) {
 					case 'vertical':
 						$this.proxyTransition  = $.proxy($this.renderVertical, $this);
 						break;
@@ -75,31 +93,66 @@ if (!jQuery) { throw new Error("jquery-parallax Engine requires jQuery"); }
 			getHeight : function() {
 				
 				var element = this.element;
-				var $defaults = this.$defaults;
+				var defaults = this.defaults;
 				
-				if ($defaults.outerHeight)
+				if (defaults.outerHeight)
 					return element.outerHeight(true);
 				else
 					return element.height();
 					
 			},
 			
-			renderVertical : function(currentPos) {
+			parseBGPosition : function () {
+				
 				var $this = this;
-				var $defaults = $this.$defaults;
-				$this.element.css('backgroundPosition', $defaults.xBGPos + " " + Math.round(($this.elementTop - currentPos) * $defaults.speed) + "px");
+				
+				var pattern = new RegExp(/[-+]?\d*\.?\d*/);
+				
+				var BGPosArr = $this.element.css('background-position').split(" ");
+				
+				$this.bgXunit = BGPosArr[0].replace(pattern, '');
+				$this.bgYunit = BGPosArr[1].replace(pattern, '');
+				
+				
+				$this.bgXvalue = parseFloat(BGPosArr[0].replace($this.bgXunit, ''));				
+				$this.bgYvalue = parseFloat(BGPosArr[1].replace($this.bgYunit, ''));
+				
+				
+				if ($this.bgXvalue == 0){
+					$this.bgXunit = 'px';
+				}
+				
+				if ($this.bgYvalue == 0){
+					$this.bgYunit = 'px';
+				}
+				
+			},
+			
+			renderVertical : function(currentPos) {
+				
+				var $this = this;
+				
+				$this.element.css('background-position', 
+						$this.bgXvalue+$this.bgXunit + ' ' + ($this.bgYvalue + Math.round((currentPos - $this.elementTop) * $this.defaults.speed)) + $this.bgYunit);			
 			},
 			
 			renderHorizontal : function(currentPos) {
+				
 				var $this = this;
-				var $defaults = $this.$defaults;
-				this.element.css('backgroundPosition', Math.round(( $this.elementTop - currentPos) * $defaults.speed) + "px "  + $defaults.yBGPos);
+				
+				$this.element.css('background-position', 
+						($this.bgXvalue + Math.round((currentPos - $this.elementTop) * $this.defaults.speed)) + $this.bgXunit) + ' ' + $this.bgYvalue+$this.bgYunit;
 			},
 			
 			renderDiagonal : function(currentPos) {
+				
 				var $this = this;
-				var $defaults = $this.$defaults;
-				this.element.css('backgroundPosition', Math.round(( currentPos) * $defaults.speed) + "px "  + Math.round(( $this.elementTop - currentPos) * $defaults.speed) + "px");
+				
+				var movCalc = Math.round((currentPos - $this.elementTop) * $this.defaults.speed);
+				
+				this.element.css('background-position', 
+						(($this.bgXvalue + movCalc ) + $this.bgXunit) + " " + (($this.bgYvalue + movCalc ) + $this.bgYunit));
+				
 			},
 			
 			render : function(){
@@ -160,8 +213,6 @@ if (!jQuery) { throw new Error("jquery-parallax Engine requires jQuery"); }
 	
 	$.fn.parallax.DEFAULTS = {
 			speed : 0.5,
-			xBGPos : "50%",
-			yBGPos : "50%",
 			outerHeight : true,
 			transitionType: 'vertical',
 	};
