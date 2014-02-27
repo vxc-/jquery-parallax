@@ -68,8 +68,6 @@ if (!jQuery) { throw new Error("jquery-parallax Engine requires jQuery"); }
 					$this.defaults.speed = $this.defaults.speed / 4;
 				}
 				
-				console.log('Speed after possible tunning: ' + $this.defaults.speed);
-				
 			},
 			
 			dispatchTransitionType : function() {
@@ -104,15 +102,33 @@ if (!jQuery) { throw new Error("jquery-parallax Engine requires jQuery"); }
 			
 			parseBGPosition : function () {
 				
+				var IEtranslations = {
+						top: {x : '50%', y: '0px'},
+						bottom: {x: '50%', y: '100%'},
+				};
+				
 				var $this = this;
 				
 				var pattern = new RegExp(/[-+]?\d*\.?\d*/);
 				
 				var BGPosArr = $this.element.css('background-position').split(" ");
 				
+				//IExplorer possible clase
+				if (BGPosArr.length == 1){
+					//Matching key in translation object
+					if (BGPosArr[0] in IEtranslations){
+						var matchKey = BGPosArr[0];
+						var match = IEtranslations[matchKey];
+						BGPosArr[0] = match.x;
+						BGPosArr[1] = match.y;
+					//If it doesn't match is always 50%
+					}else{
+						BGPosArr[1] = '50%';
+					}
+				}
+				
 				$this.bgXunit = BGPosArr[0].replace(pattern, '');
 				$this.bgYunit = BGPosArr[1].replace(pattern, '');
-				
 				
 				$this.bgXvalue = parseFloat(BGPosArr[0].replace($this.bgXunit, ''));				
 				$this.bgYvalue = parseFloat(BGPosArr[1].replace($this.bgYunit, ''));
@@ -216,6 +232,9 @@ if (!jQuery) { throw new Error("jquery-parallax Engine requires jQuery"); }
 			outerHeight : true,
 			transitionType: 'vertical',
 	};
+	
+	$('.parallax.index').parallax({speed: 0.3, transitionType: 'vertical'});
+	$('.parallax.projects').parallax({speed: 0.6});
 	
 })(jQuery);
 
