@@ -1,5 +1,7 @@
 # jquery-parallax.js
 
+[![License](https://poser.pugx.org/leaphly/cart-bundle/license.png)](https://packagist.org/packages/leaphly/cart-bundle)
+
 Simple **heavily costumizable** Parallax plugin that creates the desired effect by animating the element background-position. 
 
 By avoiding translated animations, lowers the system requirements to obtain smooth and nice results.
